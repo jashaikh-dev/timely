@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Cambay&display=swap" rel="stylesheet">
+    <title>Timely</title>
+</head>
+<body style="font-family: 'Cambay', sans-serif;">
+    <div class="container">
+        <div class="row">
+            <h4>Timely</h4>
+        </div>
+        <div class="row" id="user-input-div">
+            <div class="col s6">
+                <label>Set Size</label>
+                <input placeholder="Number of exercises : 5" id="set-size" type="number"/> 
+            </div>
+            <div class="col s6">
+                <label>Workout duration: in second</label>
+                <input placeholder="45" id="workout-duration" type="number"/> 
+            </div>
+            <div class="col s6">
+                <label>Break duration : in second</label>
+                <input placeholder="20" id="break-duration" type="number"/> 
+            </div>
+            <div class="col s6" style="display: flex; justify-content: center; align-items: center">
+                <button id="btn-start" class="waves-effect waves-light btn-large red accent-2">
+                    Start
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s6" style="background-color: #69f0ae;color: #fff" >
+                <p style="font-size: 24px">Workout</p>
+                <div style="width: 100%; display: flex; justify-content: center;"><h1 style="font-size: 8em" id="workout-time"></h1></div>
+                <p>Next Exercise</p>
+            </div> 
+            <div style="background-color: #b71c1c;color: #fff" class="col s6">
+                <p style="font-size: 24px">Break</p>
+                <div style="width: 100%; display: flex; justify-content: center;"><h1 style="font-size: 8em" id='break-time'></h1></div>
+                <p>Next Exercise</p>
+            </div>
+        </div>   
+        <div id="summary-div" class="row">
+            <div class="col s3"><span>Time Started: </span><h4 id="time-started"></h4></div>
+            <div class="col s3">    <span>Current Time</span><h4 id="current-time"></h4></div>
+            <div class="col s3"><span>Estimated finish time</span><h4 id="estimated-finish-time"></h4></div>
+            </div>
+        </div>
+    </div>
+    <script
+    src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+    crossorigin="anonymous"></script>
+
+    <script>
+        //$('#summary-div').hide();
+        const userInputDiv = $('#user-input-div');
+        
+        const workoutTime = $('#workout-time')
+
+        let localWorkoutCount = 0;
+            
+        let localBreakTimeCount = 0;
+        let localSetCount = 0;
+        $('#workout-time').text(localWorkoutCount);
+        $('#break-time').text(localBreakTimeCount);
+
+        $('#btn-start').click(function() {
+            
+            
+            const setSize = parseInt( $('#set-size').val() );
+
+            const workoutDuration = parseInt( $('#workout-duration').val() );
+
+            const breakDuration = parseInt( $('#break-duration').val() );
+            
+            const currentDate = new Date();
+            
+            // let localWorkoutCount = 0;
+            
+            // let localBreakTimeCount = 0;
+            
+            
+
+            setAllDateFields(setSize, workoutDuration, breakDuration, currentDate)
+            var currentTimeInterval = setInterval(changeCurrentTime);
+            manageWorkoutDuration(setSize,workoutDuration, breakDuration, currentTimeInterval);
+        });
+
+
+        function manageWorkoutDuration(setSize,workoutDuration, breakDuration, currentTimeInterval) {
+            var workoutTimeInterval = setInterval(
+                function(){
+                    localWorkoutCount++;
+                    if(localWorkoutCount == workoutDuration)
+                    {
+                        localWorkoutCount = 0;
+                        $('#workout-time').text(localWorkoutCount);
+                        clearThisInterval(workoutTimeInterval);
+                        manageBreakDuration(setSize,workoutDuration, breakDuration, currentTimeInterval);
+                        return
+                    }
+                    $('#workout-time').text(localWorkoutCount);
+                },
+                1000
+                );
+        }
+        function manageBreakDuration(setSize,workoutDuration, breakDuration, currentTimeInterval) {
+            localSetCount++;
+            if(setSize == localSetCount){
+                localBreakTimeCount = 0;
+                $('#break-time').text(localBreakTimeCount);
+                cleanSlate(currentTimeInterval);
+                return;
+            }
+            var breakTimeInterval = setInterval(
+                function(){
+                    localBreakTimeCount++;
+                    if(localBreakTimeCount == breakDuration)
+                    {
+                        localBreakTimeCount = 0;
+                        $('#break-time').text(localBreakTimeCount);
+                        clearThisInterval(breakTimeInterval);
+                        manageWorkoutDuration(setSize,workoutDuration, breakDuration, currentTimeInterval);
+                        return
+                    }
+                    $('#break-time').text(localBreakTimeCount);
+                },
+                1000
+                );
+        }
+        function clearThisInterval(id){
+            clearInterval(id)
+        }
+        function getEstimatedTime(setSize, workoutDuration, breakDuration, currentDate){
+            const estimatedTimeInSeconds = (setSize * (workoutDuration + breakDuration)) * 1000;
+        
+            console.log(new Date(estimatedTimeInSeconds + currentDate.getTime()))
+            const calculatedDate = new Date(estimatedTimeInSeconds + currentDate.getTime());
+            return calculatedDate.toLocaleTimeString();
+        }
+
+        /**
+        * handles setting all the time fields
+        */
+        function setAllDateFields(setSize, workoutDuration, breakDuration, currentDate) {
+            //userInputDiv.hide();
+            $('#summary-div').show();
+            $('#time-started').text(currentDate.toLocaleTimeString());
+            $('#current-time').text(currentDate.toLocaleTimeString());
+            $('#estimated-finish-time').text(getEstimatedTime(setSize, workoutDuration, breakDuration, currentDate))
+        }
+
+        /**
+        * handles changing current time
+        */
+        function changeCurrentTime(){
+            const d = new Date();
+            $('#current-time').text(d.toLocaleTimeString());
+        }
+
+        function cleanSlate(currentTimeInterval) {
+            $('#summary-div').hide();
+            userInputDiv.show();
+            localBreakTimeCount = 0;
+            localWorkoutCount = 0;
+            localSetCount = 0;
+            clearThisInterval(currentTimeInterval);
+        }
+
+    </script>
+</body>
+
+</html>
