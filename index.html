@@ -57,7 +57,7 @@
     crossorigin="anonymous"></script>
 
     <script>
-        //$('#summary-div').hide();
+        $('#summary-div').hide();
         const userInputDiv = $('#user-input-div');
         
         const workoutTime = $('#workout-time')
@@ -79,12 +79,6 @@
             const breakDuration = parseInt( $('#break-duration').val() );
             
             const currentDate = new Date();
-            
-            // let localWorkoutCount = 0;
-            
-            // let localBreakTimeCount = 0;
-            
-            
 
             setAllDateFields(setSize, workoutDuration, breakDuration, currentDate)
             var currentTimeInterval = setInterval(changeCurrentTime);
@@ -148,7 +142,7 @@
         * handles setting all the time fields
         */
         function setAllDateFields(setSize, workoutDuration, breakDuration, currentDate) {
-            //userInputDiv.hide();
+            userInputDiv.hide();
             $('#summary-div').show();
             $('#time-started').text(currentDate.toLocaleTimeString());
             $('#current-time').text(currentDate.toLocaleTimeString());
@@ -169,6 +163,9 @@
             localBreakTimeCount = 0;
             localWorkoutCount = 0;
             localSetCount = 0;
+            $('#break-duration').val('') 
+            $('#workout-duration').val('')
+            $('#set-size').val('') 
             clearThisInterval(currentTimeInterval);
         }
 
